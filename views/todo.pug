@@ -1,0 +1,22 @@
+extends layout
+block content
+    div
+        ul(style="color: red;")
+            for error in errors
+                li= error.msg
+        form(method="post", action="/")
+            div
+                label(for="addtodo") Add ToDo
+                input(type="text" name="addtodo" id="addtodo")
+            div
+                button Add
+    div
+        ul(style="list-style: none;")
+            for todo in todos
+                div(style="display: flex")
+                    li= todo.todo
+                    form(method="get", action="/edit/"+todo._id)
+                        button Edit
+                    form(method="post", action="/delete/" + todo._id)
+                        button Delete
+
