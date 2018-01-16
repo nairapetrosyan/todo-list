@@ -46,26 +46,29 @@ app.post('/', (req, res)=>{
 
 
 app.get('/edit/:_id', (req, res)=>{
-    const errors = Object.assign({}, req.session.errors);
-    req.session.errors = null;
     const todo = todos.filter(todo=>{
         return todo._id == req.params._id;
     })[0];
+    const errors = Object.assign({}, req.session.errors);
+    req.session.errors = null;
     res.render('edit', {todo, errors})
 });
+
 app.post('/edit/:_id', (req, res)=>{
     req.checkBody('edit').notEmpty().withMessage("Edit is required");
     const errors = req.validationErrors();
     if(errors){
         req.session.errors = errors;
-        res.redirect('/edit/:_id');
+        res.redirect('/edit/'+req.params._id);
     }
-    todos = todos.map(todo=>{
-        if(todo._id==req.params._id)
-            todo.todo = req.body.edit;
-        return todo;
-    });
-    res.redirect('/');
+    else {
+        todos = todos.map(todo => {
+            if (todo._id == req.params._id)
+                todo.todo = req.body.edit;
+            return todo;
+        });
+        res.redirect('/');
+    }
 });
 
 app.post('/delete/:_id', (req, res)=>{
