@@ -7,6 +7,6 @@ block content
         form(method="post", action="/edit/"+todo._id)
             div
                 label(for="edit") Edit ToDo
-                input(type="text" name="edit" id="edit")
+                input(type="text" name="edit" id="edit" value=todo.todo)
             div
                 button Edit
