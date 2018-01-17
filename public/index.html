@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+<div id="root">hello</div>
+</body>
+<script>
+
+    function renderAdd() {
+        return `
+            <div>
+                <ul>
+
+                </ul>
+                <form method="post" action="/api/todos" id="addform" data-content="post">
+                <label for="addtodo">Add Todo</label>
+                <input type="text" name="addtodo" id="addtodo">
+                <button onclick="addOrEdit()">
+                    Add
+                </button>
+                 </form>
+             </div>
+        `;
+    }
+    function editing(e){
+        event.preventDefault();
+        const input = document.getElementById('addtodo');
+        document.getElementById('addform').action= e.parentElement.action;
+        document.getElementById('addform').dataset.content='put';
+        input.value = e.dataset.content;
+
+    };
+
+
+    function todoComponent( renderAdd, data, renderErrors) {
+        let r = '';
+        data.forEach(item => {
+            r +=
+                '<li style="display: flex">' + item.todo + '<form method="get" action="/api/todos/'+item._id + '" >' +
+                '<button onclick="editing(this)" id="edit" data-content="'+item.todo+'">' + 'Edit' + '</button>' + '</form>' +
+                '<form method="delete" action="/api/todos/'+item._id + '" >' +'<button id="delete" onclick="deleteTodo(this)" >' + 'Delete' + '</button>' + '</form>'+
+                '</li>'
+        });
+        return `
+            ${renderAdd}
+           <div>
+                <ul>
+                    ${r}
+                </ul>
+           </div>
+        `
+    }
+
+    function render(data) {
+        root.innerHTML = todoComponent(renderAdd(), data.todos);
+    }
+
+    function addOrEdit(){
+        event.preventDefault();
+        const addtodo = document.getElementById('addtodo').value;
+        const url = document.getElementById('addform').action;
+        const method = document.getElementById('addform').dataset.content;
+        fetch(url, {
+            method: method,
+            body: JSON.stringify({addtodo}),
+            headers: {
+                'Content-type' : 'application/json'
+            }
+        })
+            .then((res) => res.json())
+            .then((data) => render(data))
+            .catch(console.error);
+    }
+
+    fetch('/api/todos').then((res) => res.json())
+        .then((data) => render(data))
+        .catch(console.error);
+
+    function deleteTodo(e){
+        event.preventDefault();
+        const url = e.parentElement.action;
+        fetch(url, {
+            method: 'delete',
+            headers: {
+                'Content-type' : 'application/json'
+            }
+        })
+            .then((res) => res.json())
+            .then((data) => render(data))
+            .catch(console.error);
+    }
+
+
+
+</script>
+</html>

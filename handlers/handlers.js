@@ -3,8 +3,14 @@ let id = 0;
 function getTodos(req, res){
     const errors = Object.assign({}, req.session.errors);
     req.session.errors = null;
-    res.render('todo',{ todos, errors } );
+    res.sendFile('./index.html');
 };
+
+function getApiTodos(req, res){
+    const errors={};
+    res.json({errors, todos});
+};
+
 
 function addTodo(req, res){
     req.checkBody('addtodo').notEmpty().withMessage("Todo is required");
@@ -23,6 +29,24 @@ function addTodo(req, res){
     }
 };
 
+
+function addApiTodo(req, res){
+
+    req.checkBody('addtodo').notEmpty().withMessage("Todo is required");
+    const errors = req.validationErrors();
+    if(errors){
+        req.session.errors = errors;
+        res.json({errors, todos});
+    }
+    else {
+        id++;
+        todos.push({
+            todo: req.body.addtodo,
+            _id: id});
+        res.json({todos});
+    }
+};
+
 function getEditPage(req, res){
     const todo = todos.filter(todo=>{
         return todo._id == req.params._id;
@@ -31,6 +55,7 @@ function getEditPage(req, res){
     req.session.errors = null;
     res.render('edit', {todo, errors});
 };
+
 
 function editTodo(req, res) {
     req.checkBody('edit').notEmpty().withMessage("Edit is required");
@@ -49,17 +74,36 @@ function editTodo(req, res) {
     }
 };
 
+function editApiTodo(req, res) {
+    req.checkBody('addtodo').notEmpty().withMessage("Edit is required");
+    const errors = req.validationErrors();
+    if(errors){
+        req.session.errors = errors;
+        res.json({errors, todos})
+          }
+    else {
+        todos = todos.map(todo => {
+            if (todo._id == req.params._id)
+                todo.todo = req.body.addtodo;
+            return todo;
+        });
+        res.json({todos});
+    }
+};
+
 function deleteTodo(req, res) {
     todos=todos.filter(todo=>{
         return todo._id != req.params._id;
     })
-    res.redirect('/');
+    res.json({todos});
 };
 
 module.exports = {
     getTodos,
     addTodo,
-    getEditPage,
     editTodo,
-    deleteTodo,
+    getApiTodos,
+    addApiTodo,
+    editApiTodo,
+    deleteTodo
 };
